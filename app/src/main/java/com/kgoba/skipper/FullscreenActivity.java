@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
@@ -51,7 +52,7 @@ import org.osmdroid.views.overlay.TilesOverlay;
 public class FullscreenActivity extends Activity {
     private final String TAG = "Skipper";
 
-
+    WeatherProvider mWeatherProvider;
 
 
     private MapView mMapView;
@@ -65,8 +66,10 @@ public class FullscreenActivity extends Activity {
 
         setContentView(R.layout.activity_fullscreen);
 
+        mWeatherProvider = new WeatherProvider();
+
         mMapView = createMapView();
-        LinearLayout contentView = (LinearLayout)findViewById(R.id.mainView);
+        RelativeLayout contentView = (RelativeLayout)findViewById(R.id.mainView);
         contentView.addView(mMapView);
 
         mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -78,7 +81,6 @@ public class FullscreenActivity extends Activity {
             LocationListener locationListener = new MyLocationListener();
             mLocationManager.requestLocationUpdates(provider, 1000L, 1f, locationListener);
         }
-
 
         // set initial position (delayed to fix MapView issues)
         new Handler().postDelayed(new Runnable() {
@@ -139,6 +141,21 @@ public class FullscreenActivity extends Activity {
             case R.id.action_settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
+                return true;
+            case R.id.action_test:
+                Thread thread = new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        try {
+                            //Your code goes here
+                            WeatherProvider.WeatherForecast forecast = mWeatherProvider.doStuff();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                thread.start();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
